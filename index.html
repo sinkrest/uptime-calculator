@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downtime Cost Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#141420;--surface2:#1a1a2a;
+  --text:#e4e4ef;--text-dim:#8888a0;--text-muted:#55556a;
+  --accent:#22c55e;--accent-dim:rgba(34,197,94,0.12);--accent-glow:rgba(34,197,94,0.25);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.12);
+  --border:#1e1e30;--radius:12px;
+  --font-sans:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;min-height:100vh;padding:2rem 1rem}
+.container{max-width:760px;margin:0 auto}
+
+header{text-align:center;margin-bottom:2.5rem}
+header h1{font-size:1.75rem;font-weight:700;color:var(--text);margin-bottom:0.25rem}
+header h1 span{color:var(--accent)}
+header p{color:var(--text-dim);font-size:0.95rem}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem}
+.card h2{font-size:1rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1.25rem;font-size:0.8rem}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+
+.field label{display:block;font-size:0.85rem;color:var(--text-dim);margin-bottom:0.35rem;font-weight:500}
+.field input,.field select{
+  width:100%;padding:0.65rem 0.75rem;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:var(--font-sans);font-size:0.95rem;
+  transition:border-color 0.2s
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder{color:var(--text-muted)}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;
+  padding:0.75rem 1.5rem;border:none;border-radius:8px;cursor:pointer;
+  font-family:var(--font-sans);font-size:0.95rem;font-weight:600;
+  transition:all 0.2s;width:100%;margin-top:0.75rem
+}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 20px var(--accent-glow)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;filter:none;box-shadow:none}
+
+.btn-secondary{background:var(--surface2);color:var(--accent);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);box-shadow:0 0 12px var(--accent-dim)}
+.btn-secondary:disabled{opacity:0.5;cursor:not-allowed}
+
+#results{display:none}
+
+.metric-row{display:flex;justify-content:space-between;align-items:baseline;padding:0.6rem 0;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border-bottom:none}
+.metric-label{color:var(--text-dim);font-size:0.9rem}
+.metric-value{font-family:var(--font-mono);font-weight:700;font-size:1rem;color:var(--text)}
+.metric-value.large{font-size:1.5rem;color:var(--accent)}
+.metric-value.red{color:var(--red)}
+
+.highlight-box{background:var(--accent-dim);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.highlight-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--accent)}
+.highlight-box .label{color:var(--text-dim);font-size:0.85rem;margin-top:0.25rem}
+
+.risk-box{background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:1rem;margin-top:0.75rem}
+.risk-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--red)}
+.risk-box .label{color:var(--text-dim);font-size:0.85rem;margin-top:0.25rem}
+
+.comparison{font-size:0.85rem;margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;display:inline-block}
+.comparison.above{background:var(--red-dim);color:var(--red)}
+.comparison.below{background:var(--accent-dim);color:var(--accent)}
+
+#insight-box{display:none;margin-top:1rem;padding:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+#insight-box p{font-size:0.9rem;line-height:1.7;color:var(--text)}
+#insight-box .tag{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:0.5rem;font-weight:600}
+
+.source-note{font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;font-style:italic}
+
+footer{text-align:center;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+footer .credit{color:var(--text-dim);font-size:0.85rem}
+footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Downtime <span>Cost</span> Calculator</h1>
+  <p>See what outages actually cost your business — and what monitoring saves</p>
+</header>
+
+<div class="card">
+  <h2>Your Business Profile</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="revenue">Annual Revenue (USD)</label>
+      <input type="number" id="revenue" placeholder="e.g. 10000000" min="0">
+    </div>
+    <div class="field">
+      <label for="industry">Industry Vertical</label>
+      <select id="industry">
+        <option value="saas">SaaS / B2B</option>
+        <option value="ecommerce">E-commerce</option>
+        <option value="finance">Financial Services</option>
+        <option value="healthcare">Healthcare</option>
+        <option value="media">Media / Entertainment</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="incidents">Avg. Monthly Incidents</label>
+      <input type="number" id="incidents" placeholder="e.g. 3" min="0">
+    </div>
+    <div class="field">
+      <label for="duration">Avg. Incident Duration (min)</label>
+      <input type="number" id="duration" placeholder="e.g. 25" min="0">
+    </div>
+  </div>
+  <button class="btn btn-primary" id="calculate" onclick="calculate()">Calculate Downtime Cost</button>
+</div>
+
+<div id="results">
+
+  <div class="card">
+    <h2>Cost of Downtime</h2>
+    <div class="metric-row">
+      <span class="metric-label">Cost per minute</span>
+      <span class="metric-value large" id="costMin">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Cost per hour</span>
+      <span class="metric-value" id="costHour">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Cost per incident (avg)</span>
+      <span class="metric-value" id="costIncident">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Monthly downtime cost</span>
+      <span class="metric-value" id="costMonthly">—</span>
+    </div>
+    <div class="risk-box">
+      <div class="big-number" id="costAnnual">—</div>
+      <div class="label">Estimated annual downtime cost</div>
+    </div>
+    <p class="source-note">Includes revenue loss, productivity impact, and brand/SLA cost multipliers by industry (Gartner, ITIC research)</p>
+  </div>
+
+  <div class="card">
+    <h2>Annual Risk Exposure</h2>
+    <div class="metric-row">
+      <span class="metric-label">Industry avg. downtime</span>
+      <span class="metric-value" id="industryAvg">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Your estimated downtime</span>
+      <span class="metric-value" id="yourDowntime">—</span>
+    </div>
+    <div id="comparisonWrap"></div>
+    <div class="metric-row" style="border-bottom:none">
+      <span class="metric-label">Annual exposure at current rate</span>
+      <span class="metric-value red" id="annualExposure">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Monitoring ROI</h2>
+    <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem">With sub-minute alerting (15-second check intervals):</p>
+    <div class="metric-row">
+      <span class="metric-label">Minutes saved per incident</span>
+      <span class="metric-value" id="minSaved">8 min</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Annual time saved</span>
+      <span class="metric-value" id="timeSaved">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Annual savings from faster detection</span>
+      <span class="metric-value" id="annualSavings">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Monitoring cost (~$50/mo)</span>
+      <span class="metric-value" id="monCost">$600/yr</span>
+    </div>
+    <div class="highlight-box">
+      <div class="big-number" id="roiMultiple">—</div>
+      <div class="label">Return on monitoring investment</div>
+    </div>
+
+    <button class="btn btn-secondary" id="insightBtn" onclick="getInsight()" style="margin-top:1rem">
+      Get AI Executive Insight
+    </button>
+    <div id="insight-box">
+      <div class="tag">AI Executive Insight</div>
+      <p id="insight-text"></p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="credit">Built by <a href="https://romanmartins.com" target="_blank">Roman Martins</a></div>
+  <div class="subtle">Product thinking applied to monitoring</div>
+</footer>
+
+</div>
+
+<script>
+const MULTIPLIERS = { saas: 1.5, ecommerce: 1.8, finance: 2.5, healthcare: 2.0, media: 1.3, other: 1.0 };
+const AVG_DOWNTIME_HRS = { saas: 7.8, ecommerce: 8.2, finance: 5.1, healthcare: 6.3, media: 9.5, other: 8.0 };
+const INDUSTRY_LABELS = { saas: 'SaaS / B2B', ecommerce: 'E-commerce', finance: 'Financial Services', healthcare: 'Healthcare', media: 'Media / Entertainment', other: 'Other' };
+const MINUTES_SAVED = 8;
+const MONITORING_COST = 600;
+
+function fmt(n) {
+  if (n >= 1000000) return '$' + (n / 1000000).toFixed(2) + 'M';
+  if (n >= 10000) return '$' + Math.round(n).toLocaleString('en-US');
+  if (n >= 100) return '$' + Math.round(n).toLocaleString('en-US');
+  return '$' + n.toFixed(2);
+}
+
+let lastCalc = {};
+
+function calculate() {
+  const revenue = parseFloat(document.getElementById('revenue').value);
+  const industry = document.getElementById('industry').value;
+  const incidents = parseFloat(document.getElementById('incidents').value);
+  const duration = parseFloat(document.getElementById('duration').value);
+
+  if (!revenue || !incidents || !duration || revenue <= 0) {
+    alert('Please fill in all fields with values greater than zero.');
+    return;
+  }
+
+  const mult = MULTIPLIERS[industry];
+  const costMin = (revenue / 525600) * mult;
+  const costHour = costMin * 60;
+  const costInc = costMin * duration;
+  const costMo = costInc * incidents;
+  const costYr = costMo * 12;
+
+  const avgDown = AVG_DOWNTIME_HRS[industry];
+  const yourDownMin = incidents * duration * 12;
+  const yourDownHrs = yourDownMin / 60;
+  const annualExposure = yourDownMin * costMin;
+
+  const annualMinSaved = MINUTES_SAVED * incidents * 12;
+  const annualSavings = annualMinSaved * costMin;
+  const roi = annualSavings / MONITORING_COST;
+
+  document.getElementById('costMin').textContent = fmt(costMin);
+  document.getElementById('costHour').textContent = fmt(costHour);
+  document.getElementById('costIncident').textContent = fmt(costInc);
+  document.getElementById('costMonthly').textContent = fmt(costMo);
+  document.getElementById('costAnnual').textContent = fmt(costYr);
+
+  document.getElementById('industryAvg').textContent = avgDown + ' hrs/year';
+  document.getElementById('yourDowntime').textContent = yourDownHrs.toFixed(1) + ' hrs/year';
+
+  const wrap = document.getElementById('comparisonWrap');
+  const diff = yourDownHrs - avgDown;
+  if (diff > 0) {
+    wrap.innerHTML = '<div class="comparison above">' + diff.toFixed(1) + ' hrs above ' + INDUSTRY_LABELS[industry] + ' average</div>';
+  } else {
+    wrap.innerHTML = '<div class="comparison below">' + Math.abs(diff).toFixed(1) + ' hrs below ' + INDUSTRY_LABELS[industry] + ' average</div>';
+  }
+
+  document.getElementById('annualExposure').textContent = fmt(annualExposure);
+  document.getElementById('timeSaved').textContent = annualMinSaved + ' min/year';
+  document.getElementById('annualSavings').textContent = fmt(annualSavings);
+  document.getElementById('roiMultiple').textContent = Math.round(roi) + 'x return';
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('insight-box').style.display = 'none';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  lastCalc = { revenue, industry: INDUSTRY_LABELS[industry], incidents, duration, costMin, costYr, annualSavings, roi, yourDownHrs, avgDown };
+}
+
+async function getInsight() {
+  const btn = document.getElementById('insightBtn');
+  const box = document.getElementById('insight-box');
+  const txt = document.getElementById('insight-text');
+
+  if (!lastCalc.costMin) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  box.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: 'You are a monitoring ROI analyst. Given downtime cost figures, write exactly 2 sentences as an executive insight about why this company needs sub-minute monitoring. Be specific with the dollar numbers provided. No fluff, no hedging. Speak directly to a CTO or VP Engineering.',
+        messages: [{ role: 'user', content:
+          'Company profile: ' + lastCalc.industry + ' with $' + lastCalc.revenue.toLocaleString() + ' annual revenue. ' +
+          'They experience ' + lastCalc.incidents + ' incidents/month averaging ' + lastCalc.duration + ' minutes each. ' +
+          'Cost per minute of downtime: ' + fmt(lastCalc.costMin) + '. ' +
+          'Annual downtime cost: ' + fmt(lastCalc.costYr) + '. ' +
+          'Their downtime is ' + lastCalc.yourDownHrs.toFixed(1) + ' hrs/year vs industry average of ' + lastCalc.avgDown + ' hrs/year. ' +
+          'With 15-second monitoring checks, they would save ' + fmt(lastCalc.annualSavings) + '/year — a ' + Math.round(lastCalc.roi) + 'x return on a $600/year monitoring investment.'
+        }],
+        max_tokens: 200
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    txt.textContent = data.content[0].text;
+    box.style.display = 'block';
+  } catch (e) {
+    txt.textContent = 'Unable to generate insight. The core calculator results above tell the story.';
+    box.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Get AI Executive Insight';
+}
+</script>
+</body>
+</html>
