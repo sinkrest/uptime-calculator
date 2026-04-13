@@ -5,98 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Downtime Cost Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#fafafa;--surface:#ffffff;--surface2:#f4f4f5;
-  --text:#111C24;--text-dim:#4a5568;--text-muted:#9ca3af;
-  --accent:#00AA66;--accent-light:#e6f9f0;--accent-hover:#009959;
-  --red:#dc2626;--red-light:#fef2f2;
-  --border:#efefef;--radius:8px;
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-lg:0 4px 12px rgba(0,0,0,0.08);
-  --font-sans:'Roboto',system-ui,sans-serif;--font-mono:'Roboto Mono',monospace;
+  --bg:#080810;
+  --surface:rgba(255,255,255,0.04);
+  --surface2:rgba(255,255,255,0.06);
+  --surface3:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.08);
+  --border-mid:rgba(255,255,255,0.12);
+  --text:#e4eaf4;
+  --text-mid:#94a7c8;
+  --text-dim:#6b7a94;
+  --accent:#c65d21;
+  --accent-light:#e8743a;
+  --accent-bg:rgba(198,93,33,0.08);
+  --accent-border:rgba(198,93,33,0.25);
+  --green:#22c55e;
+  --green-bg:rgba(34,197,94,0.08);
+  --green-border:rgba(34,197,94,0.25);
+  --red:#ef4444;
+  --red-bg:rgba(239,68,68,0.08);
+  --red-border:rgba(239,68,68,0.25);
+  --radius:10px;
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;min-height:100vh;padding:2.5rem 1rem}
-.container{max-width:760px;margin:0 auto}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;min-height:100vh}
+.container{max-width:760px;margin:0 auto;padding:0 1rem 3rem}
 
-header{text-align:center;margin-bottom:2.5rem}
-header h1{font-size:1.75rem;font-weight:700;color:var(--text);margin-bottom:0.25rem}
-header h1 span{color:var(--accent)}
-header p{color:var(--text-dim);font-size:0.95rem}
+/* Hero */
+.hero{
+  text-align:center;padding:3rem 1.5rem 2.5rem;margin-bottom:2rem;
+  background:linear-gradient(180deg,rgba(198,93,33,0.10) 0%,rgba(198,93,33,0.02) 60%,transparent 100%);
+  border-bottom:1px solid var(--border);
+}
+.badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--accent-light);background:var(--accent-bg);border:1px solid var(--accent-border);
+  border-radius:64px;padding:0.3rem 0.85rem;margin-bottom:1.25rem;
+}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent-light)}
+.hero h1{font-size:1.85rem;font-weight:700;color:var(--text);margin-bottom:0.35rem;letter-spacing:-0.02em}
+.hero h1 span{color:var(--accent-light)}
+.hero p{color:var(--text-dim);font-size:0.95rem;max-width:480px;margin:0 auto}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
-.card h2{font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1.25rem}
+.hero-stats{
+  display:flex;justify-content:center;gap:2.5rem;margin-top:1.75rem;
+  padding-top:1.25rem;border-top:1px solid var(--border);
+}
+.hero-stat{text-align:center}
+.hero-stat .num{font-family:var(--font-mono);font-size:1.25rem;font-weight:700;color:var(--accent-light)}
+.hero-stat .lbl{font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-top:0.15rem}
 
+/* Cards */
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.5rem;margin-bottom:1.25rem;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.card h2{
+  font-size:0.75rem;font-weight:600;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1.25rem;
+}
+
+/* Form */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:560px){.form-grid{grid-template-columns:1fr}}
 
-.field label{display:block;font-size:0.85rem;color:var(--text-dim);margin-bottom:0.35rem;font-weight:500}
+.field label{display:block;font-size:0.85rem;color:var(--text-mid);margin-bottom:0.35rem;font-weight:500}
 .field input,.field select{
-  width:100%;padding:0.65rem 0.75rem;background:var(--surface);border:1px solid #d1d5db;
-  border-radius:6px;color:var(--text);font-family:var(--font-sans);font-size:0.95rem;
-  transition:border-color 0.2s,box-shadow 0.2s
+  width:100%;padding:0.65rem 0.75rem;
+  background:var(--surface2);border:1px solid var(--border-mid);
+  border-radius:8px;color:var(--text);font-family:var(--font-sans);font-size:0.95rem;
+  transition:border-color 0.2s,box-shadow 0.2s;
 }
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-.field input::placeholder{color:var(--text-muted)}
-.field select{cursor:pointer}
+.field input:focus,.field select:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-bg),0 0 12px rgba(198,93,33,0.15);
+}
+.field input::placeholder{color:var(--text-dim)}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7a94' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.75rem center}
+.field select option{background:#14141e;color:var(--text)}
 
+/* Buttons */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;
   padding:0.75rem 1.5rem;border:none;border-radius:64px;cursor:pointer;
   font-family:var(--font-sans);font-size:0.95rem;font-weight:700;
-  transition:all 0.2s;width:100%;margin-top:0.75rem
+  transition:all 0.2s;width:100%;margin-top:0.75rem;
 }
 .btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-hover);box-shadow:var(--shadow-lg)}
+.btn-primary:hover{background:var(--accent-light);box-shadow:0 4px 20px rgba(198,93,33,0.3)}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed;box-shadow:none}
 
-.btn-secondary{background:var(--surface);color:var(--accent);border:2px solid var(--accent)}
-.btn-secondary:hover{background:var(--accent-light)}
+.btn-secondary{background:transparent;color:var(--accent-light);border:2px solid var(--accent-border)}
+.btn-secondary:hover{background:var(--accent-bg);border-color:var(--accent)}
 .btn-secondary:disabled{opacity:0.5;cursor:not-allowed}
 
 #results{display:none}
 
+/* Metrics */
 .metric-row{display:flex;justify-content:space-between;align-items:baseline;padding:0.65rem 0;border-bottom:1px solid var(--border)}
 .metric-row:last-child{border-bottom:none}
 .metric-label{color:var(--text-dim);font-size:0.9rem}
 .metric-value{font-family:var(--font-mono);font-weight:700;font-size:1rem;color:var(--text)}
-.metric-value.large{font-size:1.5rem;color:var(--accent)}
+.metric-value.large{font-size:1.5rem;color:var(--accent-light)}
 .metric-value.red{color:var(--red)}
 
-.highlight-box{background:var(--accent-light);border:1px solid rgba(0,170,102,0.2);border-radius:8px;padding:1rem;margin-top:0.75rem}
-.highlight-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--accent)}
+/* Highlight box (orange) */
+.highlight-box{
+  background:var(--accent-bg);border:1px solid var(--accent-border);
+  border-radius:8px;padding:1rem;margin-top:0.75rem;
+}
+.highlight-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--accent-light)}
 .highlight-box .label{color:var(--text-dim);font-size:0.85rem;margin-top:0.25rem}
 
-.risk-box{background:var(--red-light);border:1px solid rgba(220,38,38,0.15);border-radius:8px;padding:1rem;margin-top:0.75rem}
+/* Risk box (red) */
+.risk-box{
+  background:var(--red-bg);border:1px solid var(--red-border);
+  border-radius:8px;padding:1rem;margin-top:0.75rem;
+}
 .risk-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--red)}
 .risk-box .label{color:var(--text-dim);font-size:0.85rem;margin-top:0.25rem}
 
+/* ROI box (green) */
+.roi-box{
+  background:var(--green-bg);border:1px solid var(--green-border);
+  border-radius:8px;padding:1rem;margin-top:0.75rem;
+}
+.roi-box .big-number{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--green)}
+.roi-box .label{color:var(--text-dim);font-size:0.85rem;margin-top:0.25rem}
+
+/* Comparison */
 .comparison{font-size:0.85rem;margin-top:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;display:inline-block}
-.comparison.above{background:var(--red-light);color:var(--red)}
-.comparison.below{background:var(--accent-light);color:var(--accent)}
+.comparison.above{background:var(--red-bg);color:var(--red)}
+.comparison.below{background:var(--green-bg);color:var(--green)}
 
-#insight-box{display:none;margin-top:1rem;padding:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+/* Insight box */
+#insight-box{
+  display:none;margin-top:1rem;padding:1rem;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+}
 #insight-box p{font-size:0.9rem;line-height:1.7;color:var(--text)}
-#insight-box .tag{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:0.5rem;font-weight:700}
+#insight-box .tag{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-light);margin-bottom:0.5rem;font-weight:700}
 
-.source-note{font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;font-style:italic}
+.source-note{font-size:0.75rem;color:var(--text-dim);margin-top:0.75rem;font-style:italic}
 
+/* Footer */
 footer{text-align:center;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
-footer a{color:var(--accent);text-decoration:none;font-weight:500}
-footer a:hover{text-decoration:underline}
-footer .credit{color:var(--text-dim);font-size:0.85rem}
-footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
+footer a{color:var(--accent-light);text-decoration:none;font-weight:500}
+footer a:hover{text-decoration:underline;color:var(--accent)}
+footer .credit{color:var(--text-mid);font-size:0.85rem}
+footer .links{display:flex;justify-content:center;gap:1.25rem;margin-top:0.5rem}
+footer .links a{font-size:0.8rem;color:var(--text-dim)}
+footer .links a:hover{color:var(--accent-light)}
+footer .subtle{color:var(--text-dim);font-size:0.75rem;margin-top:0.5rem}
 </style>
 </head>
 <body>
-<div class="container">
 
-<header>
+<div class="hero">
+  <div class="badge">Manufacturing + AI</div>
   <h1>Downtime <span>Cost</span> Calculator</h1>
-  <p>See what outages actually cost your business — and what monitoring saves</p>
-</header>
+  <p>See what outages actually cost your business -- and what monitoring saves</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="num">$5,600</div>
+      <div class="lbl">Avg cost / min</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">87%</div>
+      <div class="lbl">Preventable</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">14h</div>
+      <div class="lbl">Avg annual downtime</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
 
 <div class="card">
   <h2>Your Business Profile</h2>
@@ -134,22 +225,22 @@ footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
     <h2>Cost of Downtime</h2>
     <div class="metric-row">
       <span class="metric-label">Cost per minute</span>
-      <span class="metric-value large" id="costMin">—</span>
+      <span class="metric-value large" id="costMin">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Cost per hour</span>
-      <span class="metric-value" id="costHour">—</span>
+      <span class="metric-value" id="costHour">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Cost per incident (avg)</span>
-      <span class="metric-value" id="costIncident">—</span>
+      <span class="metric-value" id="costIncident">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Monthly downtime cost</span>
-      <span class="metric-value" id="costMonthly">—</span>
+      <span class="metric-value" id="costMonthly">--</span>
     </div>
     <div class="risk-box">
-      <div class="big-number" id="costAnnual">—</div>
+      <div class="big-number" id="costAnnual">--</div>
       <div class="label">Estimated annual downtime cost</div>
     </div>
     <p class="source-note">Includes revenue loss, productivity impact, and brand/SLA cost multipliers by industry (Gartner, ITIC research)</p>
@@ -159,16 +250,16 @@ footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
     <h2>Annual Risk Exposure</h2>
     <div class="metric-row">
       <span class="metric-label">Industry avg. downtime</span>
-      <span class="metric-value" id="industryAvg">—</span>
+      <span class="metric-value" id="industryAvg">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Your estimated downtime</span>
-      <span class="metric-value" id="yourDowntime">—</span>
+      <span class="metric-value" id="yourDowntime">--</span>
     </div>
     <div id="comparisonWrap"></div>
     <div class="metric-row" style="border-bottom:none">
       <span class="metric-label">Annual exposure at current rate</span>
-      <span class="metric-value red" id="annualExposure">—</span>
+      <span class="metric-value red" id="annualExposure">--</span>
     </div>
   </div>
 
@@ -181,18 +272,18 @@ footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
     </div>
     <div class="metric-row">
       <span class="metric-label">Annual time saved</span>
-      <span class="metric-value" id="timeSaved">—</span>
+      <span class="metric-value" id="timeSaved">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Annual savings from faster detection</span>
-      <span class="metric-value" id="annualSavings">—</span>
+      <span class="metric-value" id="annualSavings">--</span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Monitoring cost (~$50/mo)</span>
       <span class="metric-value" id="monCost">$600/yr</span>
     </div>
-    <div class="highlight-box">
-      <div class="big-number" id="roiMultiple">—</div>
+    <div class="roi-box">
+      <div class="big-number" id="roiMultiple">--</div>
       <div class="label">Return on monitoring investment</div>
     </div>
 
@@ -209,6 +300,11 @@ footer .subtle{color:var(--text-muted);font-size:0.75rem;margin-top:0.35rem}
 
 <footer>
   <div class="credit">Built by <a href="https://romanmartins.com" target="_blank">Roman Martins</a></div>
+  <div class="links">
+    <a href="https://romanmartins.com/lab" target="_blank">Roman's Lab</a>
+    <a href="https://romanmartins.com" target="_blank">romanmartins.com</a>
+    <a href="https://github.com/forkable-factory" target="_blank">Forkable Factory</a>
+  </div>
   <div class="subtle">Product thinking applied to monitoring</div>
 </footer>
 
